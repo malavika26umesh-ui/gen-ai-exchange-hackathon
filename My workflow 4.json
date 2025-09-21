@@ -1,0 +1,282 @@
+{
+  "name": "My workflow 4",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "startup-analyst",
+        "responseMode": "lastNode",
+        "options": {
+          "rawBody": false
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -640,
+        -48
+      ],
+      "id": "e027a367-d1f4-49eb-ae5c-4984c37f099f",
+      "name": "Webhook",
+      "webhookId": "459ba2fb-0fff-4012-9211-1a1f1178bee6"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an AI Startup Analyst. Your task is to research a given startup using ythe input and provide a detailed report.\nYour Report MUST include the following sections:\n\nExecutive Summary: A brief overview of the company's value proposition.\n\nBusiness Model: How the company makes money.\n\nMarket Analysis: The target market, key competitors, and market size.\n\nFinancials: The latest funding rounds, investors, and valuation (if available).\n\nKey Risks: Potential challenges and threats to the business.\n\nYour Instructions:\n\nYou are a tool-using agent. You MUST use your tools to gather all the required information.\n\nYou MUST cite your sources by referencing the tool you used (e.g., \"[Source: Google Search]\").\n\nDo NOT use any knowledge you already have. Your analysis must be entirely based on the data you retrieve with your tools.\n\nThe final output should be a single, well-structured text report in Markdown format. Use headings (#, ##) and bullet points (-) to format the report. \n\nUse the Perplexity tool for deep research, collating reports and the Google Search tool for looking up keywords online {{ $json.content.parts[0].text }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        160,
+        -48
+      ],
+      "id": "1d4712c7-4c36-4d29-8466-bfba297ade23",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        16,
+        176
+      ],
+      "id": "665d1370-c042-4fa7-98fd-028871c85fa8",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "LDV5Q0t2FytpT8sD",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('URL', ``, 'string') }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        160,
+        176
+      ],
+      "id": "d91c0e85-a971-43ed-ad45-9c244698f453",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolSerpApi",
+      "typeVersion": 1,
+      "position": [
+        288,
+        176
+      ],
+      "id": "a9d27241-9c25-4407-babf-5b7c859a4779",
+      "name": "Google Search",
+      "credentials": {
+        "serpApi": {
+          "id": "2fx2gNxhkecaOcEP",
+          "name": "SerpAPI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "sonar-deep-research",
+        "messages": {
+          "message": [
+            {
+              "content": "=Analyse this text, get details about company by scraping all available resources and generate actionable investment insights {{ $json.content.parts[0].text }}"
+            }
+          ]
+        },
+        "options": {},
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-base.perplexityTool",
+      "typeVersion": 1,
+      "position": [
+        416,
+        176
+      ],
+      "id": "a97ab0bf-0afd-49bb-919d-863eed06c669",
+      "name": "Perplexity",
+      "credentials": {
+        "perplexityApi": {
+          "id": "YhHv5z4sSHNWu9XA",
+          "name": "Perplexity account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "document",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-1.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-1.5-flash"
+        },
+        "text": "Analyze the attached pitch deck document and extract the following information. Present the output as a single, valid JSON object.\n\nJSON -\n{\n  \"startupName\": \"string\",\n  \"tagline\": \"string\",\n  \"problem\": \"string\",\n  \"solution\": \"string\",\n  \"marketSize\": \"string\",\n  \"businessModel\": \"string\",\n  \"competition\": \"string\",\n  \"team\": \"string\",\n  \"ask\": \"string\"\n}\nBe sure to fill in the values for all the fields based on the content of the document. If a specific field is not found, use null.",
+        "inputType": "binary",
+        "binaryPropertyName": "={{ Object.keys($node[\"Webhook\"].binary)[0] }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        -416,
+        -48
+      ],
+      "id": "40af959a-28d9-49db-a9aa-c6fa73dcdcac",
+      "name": "Analyze document",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "LDV5Q0t2FytpT8sD",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9641b881-1f2c-4e22-8ba3-cee3ea44f491",
+              "name": "",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "c25f5626-3570-497d-a1fe-d0c340a04022",
+              "name": "content.parts[0].text",
+              "value": "={{ $json.content.parts[0].text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -192,
+        -48
+      ],
+      "id": "aa286d33-bccf-41ea-966d-d3dd3636fe85",
+      "name": "Edit Fields"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Analyze document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        []
+      ]
+    },
+    "Google Search": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Perplexity": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze document": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "755a9a2a-4fda-41f0-89bc-ff94d433cf94",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7e24ed0e952d8c76c81e19e0c4ae584689938070e3661ad4f18e747cb1137351"
+  },
+  "id": "BooV02s1WWxSGSlG",
+  "tags": []
+}
